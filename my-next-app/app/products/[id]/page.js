@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from 'react';
 import ProductCard from '../../components/ProductCard';
+import ProductDetails from '../../components/ProductDetails';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +33,18 @@ const ProductsPage = () => {
   const handleLoadMore = () => {
     setPage(prevPage => prevPage + 1);
   };
-
+  const ProductDetails = ({ product }) => (
+    <div>
+      <h1>{product.title}</h1>
+      <img src={product.images[0]} alt={product.title} className="h-64 object-contain" />
+      <p>{product.description}</p>
+      <p>Price: ${product.price}</p>
+      <p>Category: {product.category}</p>
+      <p>Rating: {product.rating}</p>
+      <p>Stock: {product.stock}</p>
+    </div>
+  );
+  
   return (
     <div>
       <h1>Products</h1>

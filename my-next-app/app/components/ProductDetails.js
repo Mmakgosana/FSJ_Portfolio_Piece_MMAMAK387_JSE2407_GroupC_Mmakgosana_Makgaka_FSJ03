@@ -19,6 +19,8 @@ const ProductDetails = ({ product }) => (
       </div>
     </div>
   );
+
+  
   
   export default ProductDetails;
   
