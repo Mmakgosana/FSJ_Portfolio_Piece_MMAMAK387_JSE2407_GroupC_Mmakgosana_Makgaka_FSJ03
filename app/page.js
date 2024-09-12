@@ -45,6 +45,7 @@ export default async function ProductsPage({ searchParams }) {
                   ${product.price}
                 </p>
                 <p className="text-gray-500 text-sm">{product.category}</p>
+                <Link href={`/${product.id}`}className="block mt-4 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">View Details</Link>
               </div>
             </div>
           </Link>
