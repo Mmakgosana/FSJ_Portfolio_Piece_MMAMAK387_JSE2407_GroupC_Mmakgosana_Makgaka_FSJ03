@@ -1,53 +1,67 @@
 "use client";
+
 import { useState, useEffect } from 'react';
-import ProductCard from './components/ProductCard';
-import PaginationControls from './components/PaginationControls';
-import Loading from './components/Loading';
-import ErrorMessage from './components/ErrorMessage';
-import Navbar from './components/Navbar';
+import ProductCard from '../../components/ProductCard';
 
-
-export default function HomePage() {
-  const [loading, setLoading] = useState(true);
+const ProductsPage = () => {
   const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchProducts = async (page) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`https://next-ecommerce-api.vercel.app/products?_page=${page}&_limit=20`);
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const data = await res.json();
+      setProducts(prevProducts => [...prevProducts, ...data]);
+    } catch (err) {
+      setError('Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch(`https://next-ecommerce-api.vercel.app/products?limit=20&page=${currentPage}`);
-        const data = await res.json();
-        setProducts(data); // Assume API returns a products array and total count
-        setTotalPages(data.totalPages); // Total pages info
-      } catch (error) {
-        setError('Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchProducts(page);
+  }, [page]);
 
-    fetchProducts();
-  }, [currentPage]);
-
-  if (loading) return <Loading />;
-  if (error) return <ErrorMessage message={error} />;
-
- return (
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
+  };
+  const ProductDetails = ({ product }) => (
     <div>
-      <Navbar />
-      <h1 className="text-2xl font-bold mb-4">Product List</h1>
-      <div className="grid grid-cols-4 gap-4">
+      <h1>{product.title}</h1>
+      <img src={product.images[0]} alt={product.title} className="h-64 object-contain" />
+      <p>{product.description}</p>
+      <p>Price: ${product.price}</p>
+      <p>Category: {product.category}</p>
+      <p>Rating: {product.rating}</p>
+      <p>Stock: {product.stock}</p>
+    </div>
+  );
+  
+  return (
+    <div>
+      <h1>Products</h1>
+      {error && <div>{error}</div>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      <PaginationControls
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <button onClick={handleLoadMore} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg">
+          Load More
+        </button>
+      )}
     </div>
   );
-}
+};
+
+export default ProductsPage;
