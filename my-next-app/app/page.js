@@ -4,6 +4,8 @@ import ProductCard from './components/ProductCard';
 import PaginationControls from './components/PaginationControls';
 import Loading from './components/Loading';
 import ErrorMessage from './components/ErrorMessage';
+import Navbar from './components/Navbar';
+
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,7 @@ export default function HomePage() {
 
  return (
     <div>
+      <Navbar />
       <h1 className="text-2xl font-bold mb-4">Product List</h1>
       <div className="grid grid-cols-4 gap-4">
         {products.map(product => (
