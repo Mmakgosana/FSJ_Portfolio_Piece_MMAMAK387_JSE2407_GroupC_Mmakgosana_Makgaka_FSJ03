@@ -1,6 +1,6 @@
+import { useRouter } from 'next/router';
 import ProductImageGallery from '../../components/ProductImageGallery';
 import ProductDetails from '../../components/ProductDetails';
-import { useRouter } from 'next/router';
 
 export async function getServerSideProps(context) {
   const { id } = context.params;
@@ -25,12 +25,14 @@ export async function getServerSideProps(context) {
 }
 
 export default function ProductPage({ product, error }) {
+  const router = useRouter();
+
   if (error) return <ErrorMessage message={error} />;
   if (!product) return <ErrorMessage message="Product not found" />;
 
   return (
     <div>
-      <button onClick={() => router.back()}>Back to Products</button>
+      <button onClick={() => router.back()} className="text-blue-500">Back to Products</button>
       <h1>{product.name}</h1>
       <ProductImageGallery images={product.images} />
       <ProductDetails product={product} />

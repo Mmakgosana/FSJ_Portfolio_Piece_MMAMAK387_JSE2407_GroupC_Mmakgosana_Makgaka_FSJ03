@@ -3,12 +3,12 @@ import Link from 'next/link';
 
 const Navbar = () => {
   return (
-    <nav className="bg-gray-800 p-4">
+    <nav className="bg-gray-500 p-4">
       <div className="container mx-auto flex items-center justify-between">
         {/* Store Logo */}
         <Link href="/" className="flex items-center text-white text-xl font-bold">
             <img src="/logo.png" alt="Store Logo" className="h-8 mr-2" />
-            <span>Store Name</span>
+            <span>VibeVault</span>
         </Link>
 
         {/* Navigation Links */}
