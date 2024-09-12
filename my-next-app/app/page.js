@@ -17,7 +17,7 @@ export default function HomePage() {
       try {
         const res = await fetch(`https://next-ecommerce-api.vercel.app/products?limit=20&page=${currentPage}`);
         const data = await res.json();
-        setProducts(data.products); // Assume API returns a products array and total count
+        setProducts(data); // Assume API returns a products array and total count
         setTotalPages(data.totalPages); // Total pages info
       } catch (error) {
         setError('Failed to load products');
