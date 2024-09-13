@@ -39,7 +39,7 @@ export default async function ProductPage({ params }) {
     <Header />
     <div className="max-w-5xl mx-auto p-8">
       <Link href="/products">
-        <button className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+        <button className="mb-6 px-4 py-2 bg-pink-400 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
           Back to Products
         </button>
       </Link>
