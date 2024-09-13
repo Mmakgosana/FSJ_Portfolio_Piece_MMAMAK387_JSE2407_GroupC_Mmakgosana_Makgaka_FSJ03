@@ -1,15 +1,21 @@
 // components/ProductCard.js
 import Link from "next/link";
+import ProductImageCarousel from "./ProductImageCarousel";
 
 
 export default function ProductCard({ product }) {
   return (
     <div className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <img
-        src={product.images[0]}
-        alt={product.title}
-        className="h-40 w-full object-contain"
-      />
+      {/* Display carousel if there are multiple images */}
+      {product.images.length > 1 ? (
+        <ProductImageCarousel images={product.images} />
+      ) : (
+        <img
+          src={product.images[0]}
+          alt={product.title}
+          className="h-40 w-full object-contain"
+        />
+      )}
       
       <div className="p-4">
         <h2 className="text-lg font-semibold text-gray-800 truncate">
