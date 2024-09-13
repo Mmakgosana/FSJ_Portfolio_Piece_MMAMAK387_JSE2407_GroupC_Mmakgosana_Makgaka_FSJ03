@@ -74,6 +74,8 @@ Contact
 
 For any inquiries, please reach out to makgakammakgosana@gmail.com.
 
+Vercel link: https://mmamak-387-jse-2407-group-c-makgaka-fsj-01.vercel.app/
+
 
 
 
