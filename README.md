@@ -29,7 +29,7 @@ git clone https://github.com/your-username/next-ecommerce-store.git
 cd next-ecommerce-store
 
 2. Install Dependencies
-3. 
+   
 npm install
 
 3.Running the Development Server
