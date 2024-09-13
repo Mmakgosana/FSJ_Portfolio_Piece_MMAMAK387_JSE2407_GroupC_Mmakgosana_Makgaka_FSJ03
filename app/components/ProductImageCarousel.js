@@ -6,10 +6,12 @@ export default function ProductImageCarousel({ images }) {
 
   const handleNextImage = () => {
     setCurrentImage((prev) => (prev + 1) % images.length);
+    console.log('Next Image:', (currentImage + 1) % images.length); // Debugging
   };
 
   const handlePrevImage = () => {
     setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+    console.log('Previous Image:', (prev - 1 + images.length) % images.length); // Debugging
   };
 
   return (
