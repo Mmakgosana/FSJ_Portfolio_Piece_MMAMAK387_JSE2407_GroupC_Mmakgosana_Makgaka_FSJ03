@@ -2,10 +2,9 @@
 import Link from "next/link";
 import ProductImageCarousel from "./ProductImageCarousel";
 
-
 export default function ProductCard({ product }) {
   return (
-    <div className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-white overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       {/* Display carousel if there are multiple images */}
       
       {product.images.length > 1 ? (
@@ -26,7 +25,8 @@ export default function ProductCard({ product }) {
         <p className="text-gray-500 text-sm">{product.category}</p>
         <Link
           href={`/${product.id}`}
-          className="block mt-4 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300"
+          className="block mt-4 text-center px-4 py-2 bg-pink-400
+           text-white rounded-lg hover:bg-purple-500 transition-colors duration-300"
         >
           View Details
         </Link>

@@ -1,6 +1,8 @@
 import Footer from "./components/Footer"; // Adjust the import path as necessary
 import ProductCard from "./components/ProductCard";
 import Pagination from "./components/Pagination";
+import Header from "./components/Header"; 
+
 
 
 export const dynamic = "force-dynamic"; // For always fetching fresh data
@@ -29,7 +31,10 @@ export default async function ProductsPage({ searchParams }) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div>
+      <Header />
+      <div>
+      <div className="flex flex-col min-h-screen">
       <div className="flex-grow">
         <div className="max-w-6xl mx-auto p-8">
           <h1 className="text-3xl font-bold mb-8">My products</h1>
@@ -43,5 +48,9 @@ export default async function ProductsPage({ searchParams }) {
       </div>
       <Footer />
     </div>
+    </div>
+    </div>
+    
+    
   );
 }
