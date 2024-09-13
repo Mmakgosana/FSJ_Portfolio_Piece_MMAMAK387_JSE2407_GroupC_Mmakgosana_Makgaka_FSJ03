@@ -2,6 +2,7 @@ import Footer from "./components/Footer"; // Adjust the import path as necessary
 import ProductCard from "./components/ProductCard";
 import Pagination from "./components/Pagination";
 
+
 export const dynamic = "force-dynamic"; // For always fetching fresh data
 
 async function fetchProducts(page = 1) {

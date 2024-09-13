@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Header from "../components/Header";
 import ProductDetails from "../components/ProductDetails";
 import Link from "next/link";
 
@@ -34,6 +35,8 @@ export default async function ProductPage({ params }) {
   }
 
   return (
+  <div>
+    <Header />
     <div className="max-w-5xl mx-auto p-8">
       <Link href="/products">
         <button className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
@@ -42,5 +45,7 @@ export default async function ProductPage({ params }) {
       </Link>
       <ProductDetails product={product} />
     </div>
+  </div>
+    
   );
 }
