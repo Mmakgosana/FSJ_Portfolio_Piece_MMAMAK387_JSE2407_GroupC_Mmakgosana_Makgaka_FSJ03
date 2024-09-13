@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Footer from "./components/Footer"; // Adjust the import path as necessary
 
 export const dynamic = "force-dynamic"; // For always fetching fresh data
 
@@ -26,32 +27,39 @@ export default async function ProductsPage({ searchParams }) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-8">My products</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product) => (
-          <Link key={product.id} href={`/${product.id}`}>
-            <div className="  overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <img
-                src={product.images[0]}
-                alt={product.title}
-                className="h-40 w-full object-contain"
-              />
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-800 truncate">
-                  {product.title}
-                </h2>
-                <p className="text-blue-600 font-bold mt-2">
-                  ${product.price}
-                </p>
-                <p className="text-gray-500 text-sm">{product.category}</p>
-                <Link href={`/${product.id}`}className="block mt-4 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">View Details</Link>
+    <div className="flex flex-col min-h-screen">
+      
+      <div className="flex-grow">
+        <div className="max-w-6xl mx-auto p-8">
+          <h1 className="text-3xl font-bold mb-8">My products</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
+                <img
+                  src={product.images[0]}
+                  alt={product.title}
+                  className="h-40 w-full object-contain"
+                />
+                <div className="p-4">
+                  <h2 className="text-lg font-semibold text-gray-800 truncate">
+                    {product.title}
+                  </h2>
+                  <p className="text-blue-600 font-bold mt-2">${product.price}</p>
+                  <p className="text-gray-500 text-sm">{product.category}</p>
+                  <Link href={`/${product.id}`} className="block mt-4 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                    View Details
+                  </Link>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            ))}
+          </div>
+          <Pagination currentPage={page} />
+        </div>
       </div>
-      <Pagination currentPage={page} />
+      <Footer />
     </div>
   );
 }

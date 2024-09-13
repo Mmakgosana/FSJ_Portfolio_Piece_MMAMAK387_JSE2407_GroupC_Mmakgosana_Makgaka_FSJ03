@@ -32,6 +32,7 @@ export default async function ProductPage({ params }) {
 
   return (
     <div className="max-w-5xl mx-auto p-8">
+      
       <div className="flex flex-col md:flex-row">
         <img
           src={product.images[0]}
