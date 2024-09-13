@@ -1,6 +1,7 @@
 // components/ProductCard.js
 import Link from "next/link";
 
+
 export default function ProductCard({ product }) {
   return (
     <div className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -9,6 +10,7 @@ export default function ProductCard({ product }) {
         alt={product.title}
         className="h-40 w-full object-contain"
       />
+      
       <div className="p-4">
         <h2 className="text-lg font-semibold text-gray-800 truncate">
           {product.title}
