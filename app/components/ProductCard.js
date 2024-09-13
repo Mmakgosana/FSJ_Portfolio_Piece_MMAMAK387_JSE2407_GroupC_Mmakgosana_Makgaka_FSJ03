@@ -7,6 +7,7 @@ export default function ProductCard({ product }) {
   return (
     <div className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       {/* Display carousel if there are multiple images */}
+      
       {product.images.length > 1 ? (
         <ProductImageCarousel images={product.images} />
       ) : (
