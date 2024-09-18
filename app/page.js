@@ -1,16 +1,15 @@
-import Footer from "./components/Footer"; // Adjust the import path as necessary
+"use client"; // This line makes this file a Client Component
+
+import { useState, useEffect } from "react";
+import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
 import Pagination from "./components/Pagination";
-import Header from "./components/Header"; 
+import Header from "./components/Header";
 
-
-
-export const dynamic = "force-dynamic"; // For always fetching fresh data
-
-async function fetchProducts(page = 1) {
+async function fetchProducts(page = 1, searchQuery = "") {
   const skip = (page - 1) * 20;
   const res = await fetch(
-    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20`
+    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}`
   );
 
   if (!res.ok) {
@@ -20,37 +19,58 @@ async function fetchProducts(page = 1) {
   return res.json();
 }
 
-export default async function ProductsPage({ searchParams }) {
+export default function ProductsPage({ searchParams }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState([]);
   const page = searchParams.page || 1;
-  let products;
 
-  try {
-    products = await fetchProducts(page);
-  } catch (error) {
-    return <p>Failed to load products. Please try again later.</p>;
-  }
+  useEffect(() => {
+    const fetchProductsData = async () => {
+      try {
+        const fetchedProducts = await fetchProducts(page, searchQuery);
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Failed to load products:", error);
+      }
+    };
+
+    fetchProductsData();
+  }, [page, searchQuery]);
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   return (
     <div>
       <Header />
-      <div>
       <div className="flex flex-col min-h-screen">
-      <div className="flex-grow">
-        <div className="max-w-6xl mx-auto p-8">
-          <h1 className="text-3xl font-bold mb-8">My products</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        <div className="flex-grow">
+          <div className="max-w-6xl mx-auto p-8">
+            <h1 className="text-3xl font-bold mb-8">My products</h1>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <p>No products found.</p>
+              )}
+            </div>
+            <Pagination currentPage={page} />
           </div>
-          <Pagination currentPage={page} />
         </div>
+        <Footer />
       </div>
-      <Footer />
     </div>
-    </div>
-    </div>
-    
-    
   );
 }
