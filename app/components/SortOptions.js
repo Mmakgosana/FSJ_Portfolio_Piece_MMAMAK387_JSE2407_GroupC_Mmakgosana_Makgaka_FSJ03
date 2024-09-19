@@ -17,6 +17,12 @@ const SortOptions = ({ selectedSortOrder, onSelectSortOrder }) => {
         >
           Price: High to Low
         </button>
+        <button
+          onClick={() => onSelectSortOrder('default')}
+          className={`px-4 py-2 border rounded-lg ${selectedSortOrder === 'default' ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'} hover:bg-blue-100`}
+        >
+          Default
+        </button>
       </div>
     </div>
   );

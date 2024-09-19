@@ -9,10 +9,10 @@ import CategoryFilter from "./components/CategoryFilter";
 import SortOptions from "./components/SortOptions";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-async function fetchProducts(page = 1, searchQuery = "", category = "", sortOrder = "asc") {
+async function fetchProducts(page = 1, searchQuery = "", category = "") {
   const skip = (page - 1) * 20;
   const res = await fetch(
-    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(category)}&sort=${encodeURIComponent(sortOrder)}`
+    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(category)}`
   );
 
   if (!res.ok) {
@@ -21,6 +21,7 @@ async function fetchProducts(page = 1, searchQuery = "", category = "", sortOrde
 
   return res.json();
 }
+
 
 async function fetchCategories() {
   const res = await fetch('https://next-ecommerce-api.vercel.app/categories'); // Adjust endpoint as needed
@@ -42,19 +43,31 @@ export default function ProductsPage({ searchParams }) {
     const fetchData = async () => {
       try {
         const [fetchedProducts, fetchedCategories] = await Promise.all([
-          fetchProducts(page, searchQuery, selectedCategory, selectedSortOrder),
-          fetchCategories()
+          fetchProducts(page, searchQuery, selectedCategory),
+          fetchCategories(),
         ]);
-        setProducts(fetchedProducts);
+  
+        // Client-side sorting by price
+        const sortedProducts = [...fetchedProducts].sort((a, b) => {
+          if (selectedSortOrder === 'asc') {
+            return a.price - b.price; // Ascending order (low to high)
+          } else if (selectedSortOrder === 'desc') {
+            return b.price - a.price; // Descending order (high to low)
+          }
+          return 0;
+        });
+  
+        setProducts(sortedProducts);
         setCategories(fetchedCategories);
       } catch (error) {
         console.error("Failed to load data:", error);
       }
     };
-
+  
     fetchData();
   }, [page, searchQuery, selectedCategory, selectedSortOrder]);
-
+  
+  
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -66,8 +79,10 @@ export default function ProductsPage({ searchParams }) {
 
   const handleSortOrderSelect = (sortOrder) => {
     setSelectedSortOrder(sortOrder);
-    setPage(1); // Reset to first page when sorting
+    setPage(1); // Reset to the first page when sorting
   };
+  
+  
 
   return (
     <div>
