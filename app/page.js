@@ -6,12 +6,13 @@ import ProductCard from "./components/ProductCard";
 import Pagination from "./components/Pagination";
 import Header from "./components/Header";
 import CategoryFilter from "./components/CategoryFilter";
+import SortOptions from "./components/SortOptions";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-async function fetchProducts(page = 1, searchQuery = "", category = "") {
+async function fetchProducts(page = 1, searchQuery = "", category = "", sortOrder = "asc") {
   const skip = (page - 1) * 20;
   const res = await fetch(
-    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(category)}`
+    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(category)}&sort=${encodeURIComponent(sortOrder)}`
   );
 
   if (!res.ok) {
@@ -34,13 +35,14 @@ export default function ProductsPage({ searchParams }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSortOrder, setSelectedSortOrder] = useState("asc");
   const [page, setPage] = useState(searchParams.page || 1);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [fetchedProducts, fetchedCategories] = await Promise.all([
-          fetchProducts(page, searchQuery, selectedCategory),
+          fetchProducts(page, searchQuery, selectedCategory, selectedSortOrder),
           fetchCategories()
         ]);
         setProducts(fetchedProducts);
@@ -51,7 +53,7 @@ export default function ProductsPage({ searchParams }) {
     };
 
     fetchData();
-  }, [page, searchQuery, selectedCategory]);
+  }, [page, searchQuery, selectedCategory, selectedSortOrder]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -60,6 +62,11 @@ export default function ProductsPage({ searchParams }) {
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
     setPage(1); // Reset to first page when filtering by category
+  };
+
+  const handleSortOrderSelect = (sortOrder) => {
+    setSelectedSortOrder(sortOrder);
+    setPage(1); // Reset to first page when sorting
   };
 
   return (
@@ -87,6 +94,12 @@ export default function ProductsPage({ searchParams }) {
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={handleCategorySelect}
+            />
+
+            {/* Sort Options */}
+            <SortOptions
+              selectedSortOrder={selectedSortOrder}
+              onSelectSortOrder={handleSortOrderSelect}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
