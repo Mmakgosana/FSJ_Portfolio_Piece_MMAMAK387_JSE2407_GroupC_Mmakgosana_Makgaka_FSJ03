@@ -147,7 +147,14 @@ export default function ProductsPage() {
                 <p>No products found.</p>
               )}
             </div>
-            <Pagination currentPage={page} />
+           {/* Pagination Component */}
+            <Pagination 
+              currentPage={page} 
+              searchQuery={searchQuery} 
+              selectedCategory={selectedCategory} 
+              selectedSortOrder={selectedSortOrder} 
+            />
+
           </div>
         </div>
         <Footer />
