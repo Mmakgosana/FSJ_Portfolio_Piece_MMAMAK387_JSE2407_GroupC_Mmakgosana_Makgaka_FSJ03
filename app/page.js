@@ -1,6 +1,7 @@
 "use client"; // This line makes this file a Client Component
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation"; // Import the necessary Next.js hooks
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
 import Pagination from "./components/Pagination";
@@ -22,22 +23,24 @@ async function fetchProducts(page = 1, searchQuery = "", category = "") {
   return res.json();
 }
 
-
 async function fetchCategories() {
-  const res = await fetch('https://next-ecommerce-api.vercel.app/categories'); // Adjust endpoint as needed
+  const res = await fetch('https://next-ecommerce-api.vercel.app/categories'); 
   if (!res.ok) {
     throw new Error("Failed to fetch categories");
   }
   return res.json();
 }
 
-export default function ProductsPage({ searchParams }) {
-  const [searchQuery, setSearchQuery] = useState("");
+export default function ProductsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSortOrder, setSelectedSortOrder] = useState("asc");
-  const [page, setPage] = useState(searchParams.page || 1);
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const [selectedSortOrder, setSelectedSortOrder] = useState(searchParams.get("sort") || "asc");
+  const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,7 +49,7 @@ export default function ProductsPage({ searchParams }) {
           fetchProducts(page, searchQuery, selectedCategory),
           fetchCategories(),
         ]);
-  
+
         // Client-side sorting by price
         const sortedProducts = [...fetchedProducts].sort((a, b) => {
           if (selectedSortOrder === 'asc') {
@@ -56,20 +59,40 @@ export default function ProductsPage({ searchParams }) {
           }
           return 0;
         });
-  
+
         setProducts(sortedProducts);
         setCategories(fetchedCategories);
       } catch (error) {
         console.error("Failed to load data:", error);
       }
     };
-  
+
     fetchData();
   }, [page, searchQuery, selectedCategory, selectedSortOrder]);
-  
-  
+
+  // Update the URL when search, filter, or sort options change
+  useEffect(() => {
+    const query = {
+      page,
+      search: searchQuery,
+      category: selectedCategory,
+      sort: selectedSortOrder,
+    };
+
+    // Remove empty query params
+    const cleanQuery = Object.fromEntries(
+      Object.entries(query).filter(([_, value]) => value)
+    );
+
+    router.push({
+      pathname: "/products",
+      query: cleanQuery,
+    });
+  }, [page, searchQuery, selectedCategory, selectedSortOrder]);
+
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
+    setPage(1); // Reset to first page when searching
   };
 
   const handleCategorySelect = (category) => {
@@ -79,10 +102,8 @@ export default function ProductsPage({ searchParams }) {
 
   const handleSortOrderSelect = (sortOrder) => {
     setSelectedSortOrder(sortOrder);
-    setPage(1); // Reset to the first page when sorting
+    setPage(1); // Reset to first page when sorting
   };
-  
-  
 
   return (
     <div>
@@ -91,7 +112,7 @@ export default function ProductsPage({ searchParams }) {
         <div className="flex-grow">
           <div className="max-w-6xl mx-auto p-8">
             <h1 className="text-3xl font-bold mb-8">My products</h1>
-            
+
             {/* Search Bar */}
             <div className="mb-4 relative">
               <input
