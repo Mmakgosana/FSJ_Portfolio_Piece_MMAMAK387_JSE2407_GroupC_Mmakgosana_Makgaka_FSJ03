@@ -38,7 +38,7 @@ export default async function ProductPage({ params }) {
       <Header />
       <div className="max-w-5xl mx-auto p-8">
         {/* Use Link directly without the <a> tag */}
-        <Link href="/products">
+        <Link href="/">
           <div className="inline-block mb-6 px-4 py-2 bg-pink-400 text-white rounded-lg hover:bg-purple-400 transition-colors duration-300">
             Back to Products
           </div>

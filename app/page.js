@@ -1,7 +1,7 @@
-"use client"; // Client component
+"use client"; // This line makes this file a Client Component
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // Hooks for handling router and query params
+import { useRouter, useSearchParams } from "next/navigation"; // Import the necessary Next.js hooks
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
 import Pagination from "./components/Pagination";
@@ -10,13 +10,12 @@ import CategoryFilter from "./components/CategoryFilter";
 import SortOptions from "./components/SortOptions";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-// Fetch products with query parameters
 async function fetchProducts(page = 1, searchQuery = "", category = "") {
   const skip = (page - 1) * 20;
   const res = await fetch(
     `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(category)}`
   );
-  
+
   if (!res.ok) {
     throw new Error("Failed to fetch products");
   }
@@ -24,7 +23,6 @@ async function fetchProducts(page = 1, searchQuery = "", category = "") {
   return res.json();
 }
 
-// Fetch categories
 async function fetchCategories() {
   const res = await fetch('https://next-ecommerce-api.vercel.app/categories'); 
   if (!res.ok) {
@@ -37,7 +35,6 @@ export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // State initialization based on query parameters
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -45,7 +42,6 @@ export default function ProductsPage() {
   const [selectedSortOrder, setSelectedSortOrder] = useState(searchParams.get("sort") || "asc");
   const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
 
-  // Fetch products and categories on filter changes
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,12 +50,12 @@ export default function ProductsPage() {
           fetchCategories(),
         ]);
 
-        // Sorting logic
+        // Client-side sorting by price
         const sortedProducts = [...fetchedProducts].sort((a, b) => {
           if (selectedSortOrder === 'asc') {
-            return a.price - b.price; // Ascending order
+            return a.price - b.price; // Ascending order (low to high)
           } else if (selectedSortOrder === 'desc') {
-            return b.price - a.price; // Descending order
+            return b.price - a.price; // Descending order (high to low)
           }
           return 0;
         });
@@ -74,7 +70,7 @@ export default function ProductsPage() {
     fetchData();
   }, [page, searchQuery, selectedCategory, selectedSortOrder]);
 
-  // URL synchronization with user actions
+  // Update the URL when search, filter, or sort options change
   useEffect(() => {
     const query = {
       page,
@@ -83,19 +79,17 @@ export default function ProductsPage() {
       sort: selectedSortOrder,
     };
 
-    // Remove empty params from query
+    // Remove empty query params
     const cleanQuery = Object.fromEntries(
       Object.entries(query).filter(([_, value]) => value)
     );
 
-    // Push clean query into the URL without reloading
     router.push({
       pathname: "/products",
       query: cleanQuery,
-    }, undefined, { shallow: true }); // Shallow routing to avoid full page reload
+    });
   }, [page, searchQuery, selectedCategory, selectedSortOrder]);
 
-  // Handlers for user input
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     setPage(1); // Reset to first page when searching
@@ -103,7 +97,7 @@ export default function ProductsPage() {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setPage(1); // Reset to first page when changing category
+    setPage(1); // Reset to first page when filtering by category
   };
 
   const handleSortOrderSelect = (sortOrder) => {
@@ -144,7 +138,6 @@ export default function ProductsPage() {
               onSelectSortOrder={handleSortOrderSelect}
             />
 
-            {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
               {products.length > 0 ? (
                 products.map((product) => (
@@ -154,14 +147,14 @@ export default function ProductsPage() {
                 <p>No products found.</p>
               )}
             </div>
-
-            {/* Pagination Component */}
+           {/* Pagination Component */}
             <Pagination 
               currentPage={page} 
               searchQuery={searchQuery} 
               selectedCategory={selectedCategory} 
               selectedSortOrder={selectedSortOrder} 
             />
+
           </div>
         </div>
         <Footer />
