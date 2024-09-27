@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
@@ -9,35 +9,17 @@ import Header from "./components/Header";
 import CategoryFilter from "./components/CategoryFilter";
 import SortOptions from "./components/SortOptions";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import Head from "next/head";
 
-
-// Custom debounce function
-function useDebounce(callback, delay) {
-  const timeoutRef = useRef(null);
-
-  return useCallback((...args) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      callback(...args);
-    }, delay);
-  }, [callback, delay]);
-}
-
-// Fetch products with query parameters
-async function fetchProducts(page = 1, searchQuery = "", category = "", sort="") {
-  const skip = (page - 1) * 20;
-  const res = await fetch(
-    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=20&search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(category)}&sort=${encodeURIComponent(sort)}`
-  );
-
+// Fetch products with filters and pagination
+async function fetchProducts(params) {
+  const queryString = new URLSearchParams({
+    ...params,
+    skip: ((params.page - 1) * params.limit).toString(),
+  }).toString();
+  const res = await fetch(`https://next-ecommerce-api.vercel.app/products?${queryString}`);
   if (!res.ok) {
     throw new Error("Failed to fetch products");
   }
-
   return res.json();
 }
 
@@ -54,119 +36,116 @@ export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // State initialization
-  const [searchQuery, setSearchQuery] = useState("");
+  // State initialization based on query parameters
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSortOrder, setSelectedSortOrder] = useState("asc");
-  const [page, setPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const [selectedSort, setSelectedSort] = useState(searchParams.get("sort") || "price");
+  const [selectedOrder, setSelectedOrder] = useState(searchParams.get("order") || "asc");
+  const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Debounced search query update
-  const debouncedSetSearchQuery = useDebounce((value) => {
-    setSearchQuery(value);
-    setPage(1); // Reset to first page when searching
-  }, 300);
+  const ITEMS_PER_PAGE = 20;
 
-  // Function to parse URL parameters
-  const parseUrlParams = useCallback(() => {
-    const urlSearchQuery = searchParams.get("search") || "";
-    const urlCategory = searchParams.get("category") || "";
-    const urlSortOrder = searchParams.get("sort") || "asc";
-    const urlPage = parseInt(searchParams.get("page") || "1");
-
-    setSearchQuery(urlSearchQuery);
-    setSelectedCategory(urlCategory);
-    setSelectedSortOrder(urlSortOrder);
-    setPage(urlPage);
-
-    return { urlSearchQuery, urlCategory, urlSortOrder, urlPage };
-  }, [searchParams]);
-
-  // Effect to parse URL parameters on page load
-  useEffect(() => {
-    const { urlSearchQuery, urlCategory, urlSortOrder, urlPage } = parseUrlParams();
-    fetchData(urlPage, urlSearchQuery, urlCategory, urlSortOrder);
-  }, [parseUrlParams]);
-
-  // Function to fetch data based on current state
-  const fetchData = useCallback(async (currentPage, query, category, sortOrder) => {
+  const fetchProductsData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const [fetchedProducts, fetchedCategories] = await Promise.all([
-        fetchProducts(currentPage, query, category, sortOrder),
-        fetchCategories(),
-      ]);
-
-      // Sorting logic
-      const sortedProducts = [...fetchedProducts].sort((a, b) => {
-        if (sortOrder === 'asc') {
-          return a.price - b.price; // Ascending order
-        } else if (sortOrder === 'desc') {
-          return b.price - a.price; // Descending order
-        }
-        return 0;
-      });
-
-      setProducts(sortedProducts);
-      setCategories(fetchedCategories);
+      const params = {
+        search: searchQuery,
+        category: selectedCategory,
+        sort: selectedSort,
+        order: selectedOrder,
+        page: page,
+        limit: ITEMS_PER_PAGE
+      };
+      const data = await fetchProducts(params);
+      console.log("Fetched data:", data); // Log the fetched data
+      setProducts(data.products || data);
+      setTotalPages(Math.ceil((data.total || data.length) / ITEMS_PER_PAGE));
     } catch (error) {
-      console.error("Failed to load data:", error);
+      console.error("Failed to fetch products:", error);
+      setProducts([]);
+      setTotalPages(1);
     }
-  }, []);
+    setIsLoading(false);
+  }, [searchQuery, selectedCategory, selectedSort, selectedOrder, page]);
 
-  // Effect to fetch products when filters change
+  // Fetch categories on initial load
   useEffect(() => {
-    fetchData(page, searchQuery, selectedCategory, selectedSortOrder);
-  }, [page, searchQuery, selectedCategory, selectedSortOrder, fetchData]);
-
-  // Function to update URL
-  const updateUrl = useCallback(() => {
-    const query = {
-      page: page.toString(),
-      search: searchQuery || undefined,
-      category: selectedCategory || undefined,
-      sort: selectedSortOrder || undefined,
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await fetchCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      }
     };
 
-    const cleanQuery = Object.fromEntries(
-      Object.entries(query)
-        .filter(([_, value]) => value !== undefined)
-        .map(([key, value]) => [key, String(value)])
-    );
+    loadCategories();
+  }, []);
 
-    const pathname = "/products"; // Define the path to navigate to
-
-    router.push({
-      pathname: '/products',
-      query: cleanQuery,
-    }, undefined, { shallow: true });
-  }, [page, searchQuery, selectedCategory, selectedSortOrder, router]);
-
-  // Effect to update URL when state changes
+  // Fetch products when filters or page changes
   useEffect(() => {
-    updateUrl();
-  }, [page, searchQuery, selectedCategory, selectedSortOrder, updateUrl]);
+    fetchProductsData();
+  }, [fetchProductsData]);
+
+  // Update URL with current filters and page
+  useEffect(() => {
+    const query = new URLSearchParams({
+      search: searchQuery,
+      category: selectedCategory,
+      sort: selectedSort,
+      order: selectedOrder,
+      page: page.toString(),
+    }).toString();
+    router.push(`?${query}`, { scroll: false });
+  }, [searchQuery, selectedCategory, selectedSort, selectedOrder, page, router]);
+
+  // Parse URL parameters on page load
+  useEffect(() => {
+    const newPage = parseInt(searchParams.get("page")) || 1;
+    setSearchQuery(searchParams.get("search") || "");
+    setSelectedCategory(searchParams.get("category") || "");
+    setSelectedSort(searchParams.get("sort") || "price");
+    setSelectedOrder(searchParams.get("order") || "asc");
+    setPage(newPage);
+  }, [searchParams]);
 
   // Handlers for user input
   const handleSearch = (e) => {
-    debouncedSetSearchQuery(e.target.value);
+    setSearchQuery(e.target.value);
+    setPage(1);
   };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setPage(1); // Reset to first page when changing category
+    setPage(1);
   };
 
-  const handleSortOrderSelect = (sortOrder) => {
-    setSelectedSortOrder(sortOrder);
-    setPage(1); // Reset to first page when sorting
+  const handleSortOrderSelect = (sort, order) => {
+    setSelectedSort(sort);
+    setSelectedOrder(order);
+    setPage(1);
+  };
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("");
+    setSelectedSort("price");
+    setSelectedOrder("asc");
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo(0, 0);
   };
 
   return (
-    
     <div>
       <Header />
-      
       <div className="flex flex-col min-h-screen">
         <div className="flex-grow">
           <div className="max-w-6xl mx-auto p-8">
@@ -193,28 +172,36 @@ export default function ProductsPage() {
 
             {/* Sort Options */}
             <SortOptions
-              selectedSortOrder={selectedSortOrder}
+              selectedSort={selectedSort}
+              selectedOrder={selectedOrder}
               onSelectSortOrder={handleSortOrderSelect}
             />
+            
+            {/* Reset Filters Button */}
+            <button onClick={resetFilters} className="mt-4 p-2 bg-red-500 text-white rounded">
+              Reset Filters
+            </button>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
-              {products.length > 0 ? (
-                products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))
-              ) : (
-                <p>No products found.</p>
-              )}
-            </div>
+            {isLoading ? (
+              <p>Loading products...</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))
+                ) : (
+                  <p>No products found.</p>
+                )}
+              </div>
+            )}
 
             {/* Pagination Component */}
             <Pagination 
               currentPage={page} 
-              searchQuery={searchQuery} 
-              selectedCategory={selectedCategory} 
-              selectedSortOrder={selectedSortOrder} 
-              onPageChange={setPage} // Ensure this prop is passed to handle page changes
+              totalPages={totalPages} 
+              onPageChange={handlePageChange}
             />
           </div>
         </div>

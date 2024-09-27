@@ -1,6 +1,26 @@
+"use client"; // Add this directive at the top
+
+import React, { useState } from "react";
 import ProductImageCarousel from './ProductImageCarousel';
 
 export default function ProductDetails({ product }) {
+  // State to manage review sorting
+  const [sortOrder, setSortOrder] = useState("newest"); // Default sort by newest
+
+  // Function to handle review sorting
+  const sortedReviews = [...product.reviews].sort((a, b) => {
+    if (sortOrder === "newest") {
+      return new Date(b.date) - new Date(a.date); // Newest first
+    } else if (sortOrder === "oldest") {
+      return new Date(a.date) - new Date(b.date); // Oldest first
+    } else if (sortOrder === "highestRating") {
+      return b.rating - a.rating; // Highest rating first
+    } else if (sortOrder === "lowestRating") {
+      return a.rating - b.rating; // Lowest rating first
+    }
+    return 0; // Default case
+  });
+
   return (
     <div className="flex flex-col md:flex-row">
       {/* Display either a single image or a carousel */}
@@ -39,12 +59,32 @@ export default function ProductDetails({ product }) {
 
         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold mb-4">Reviews</h3>
-          {product.reviews.length > 0 ? (
-            product.reviews.map((review) => (
+          
+          {/* Sort options */}
+          <div className="mb-4">
+            <label htmlFor="sortOrder" className="text-sm font-medium mr-2">
+              Sort by:
+            </label>
+            <select
+              id="sortOrder"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="p-2 border rounded-md"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="highestRating">Highest Rating</option>
+              <option value="lowestRating">Lowest Rating</option>
+            </select>
+          </div>
+
+          {/* Display reviews */}
+          {sortedReviews.length > 0 ? (
+            sortedReviews.map((review) => (
               <div key={review.id} className="mb-4 border-b pb-4">
                 <p className="font-medium">
-                  {review.name} -{' '}
-                  <span className="text-gray-500">{review.date}</span>
+                  {review.reviewerName} -{' '}
+                  <span className="text-gray-500">{new Date(review.date).toLocaleDateString()}</span>
                 </p>
                 <p className="text-sm text-gray-600">{review.comment}</p>
                 <p className="text-sm font-semibold">Rating: {review.rating}</p>
