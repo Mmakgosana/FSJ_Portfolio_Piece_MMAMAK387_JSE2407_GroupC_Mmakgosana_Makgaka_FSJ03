@@ -15,7 +15,7 @@ export default function Header() {
             className="mr-2"
           />
           {/* Title */}
-          <h1 className="text-2xl font-bold">E-Commerce Store</h1>
+          <h1 className="text-2xl font-bold">Bargain Bliss</h1>
         </Link>
         <nav>
           <Link href="/products" className="mr-4 hover:underline">
