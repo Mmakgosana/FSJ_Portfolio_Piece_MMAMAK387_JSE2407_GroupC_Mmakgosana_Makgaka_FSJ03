@@ -23,6 +23,7 @@ export default function ProductCard({ product }) {
         </h2>
         <p className="text-blue-600 font-bold mt-2">${product.price}</p>
         <p className="text-gray-500 text-sm">{product.category}</p>
+        
         <Link
           href={`/${product.id}`}
           className="block mt-4 text-center px-4 py-2 bg-pink-400
