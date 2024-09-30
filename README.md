@@ -54,28 +54,40 @@ npm run build( To build the project for production)
 npm start( to start the production server)
 
 Usage
+
 Search for Products
 Use the search bar on the home page to search for products by entering a title or part of a title.
 The results will automatically update based on the search query.
+
 Filter Products by Category
 Choose a category from the filter options to see products from that category.
+
 Sort Products
 Sort products by price (ascending or descending) using the sort options.
+
 On the product detail page, you can also sort reviews by date or rating.
+
 URL Sharing and Bookmarking
 The URL reflects your current search, filter, and sort settings, allowing you to share or bookmark your current view.
+
 Resetting Filters and Sorting
 Click the "Reset" button to reset all filtering, sorting, and searching, returning to the default product list.
+
 Paginated Results
 If filtered or sorted results exceed 20 products, pagination controls will allow you to navigate between pages of results.
+
 API Integration
 The app fetches product data from an API with a single function that handles searching, filtering, sorting, and pagination in one query.
+
 The API query ensures efficient fetching of only the data needed for each page load.
+
 Meta Tags and SEO
 SEO is improved with dynamic meta tags that change based on the product details.
 Each product page will display the specific product title in the browser tab.
+
 Caching and Performance Optimization
 The application uses Next.js's server-side caching strategies to reduce redundant requests and improve performance.
+
 Images are optimized using Next.js built-in features, ensuring they are served in modern formats like WebP.
 
 Contact
