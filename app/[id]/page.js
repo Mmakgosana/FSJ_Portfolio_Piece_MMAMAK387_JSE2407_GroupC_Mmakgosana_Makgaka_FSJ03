@@ -23,12 +23,14 @@ export default async function ProductPage({ params }) {
   try {
     product = await fetchProduct(id);
   } catch (error) {
+    console.error("Error fetching product:", error); // Add this for logging
     return (
       <p className="text-red-500">
         Failed to load product. Please try again later.
       </p>
     );
   }
+  
 
   if (!product) {
     return notFound();

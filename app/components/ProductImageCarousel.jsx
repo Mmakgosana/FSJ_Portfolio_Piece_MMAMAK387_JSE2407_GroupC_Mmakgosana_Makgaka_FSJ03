@@ -24,6 +24,7 @@ export default function ProductImageCarousel({ images }) {
       {/* Left arrow */}
       {images.length > 1 && (
         <button
+          aria-label="Previous image"
           className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full focus:outline-none"
           onClick={handlePrevImage}
         >
@@ -34,6 +35,7 @@ export default function ProductImageCarousel({ images }) {
       {/* Right arrow */}
       {images.length > 1 && (
         <button
+        aria-label="Next image"
           className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full focus:outline-none"
           onClick={handleNextImage}
         >

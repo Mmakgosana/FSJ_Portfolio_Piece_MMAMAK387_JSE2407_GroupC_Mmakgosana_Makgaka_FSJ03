@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext, createContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";

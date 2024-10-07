@@ -7,13 +7,13 @@ const SortOptions = ({ selectedSortOrder, onSelectSortOrder }) => {
       <div className="flex gap-2">
         <button
           onClick={() => onSelectSortOrder('asc')}
-          className={`px-4 py-2 border rounded-lg ${selectedSortOrder === 'asc' ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'} hover:bg-blue-100`}
+          className={`px-4 py-2 border rounded-lg ${selectedSortOrder === 'asc' ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'} hover:bg-blue-100 focus:outline-none`}
         >
           Price: Low to High
         </button>
         <button
           onClick={() => onSelectSortOrder('desc')}
-          className={`px-4 py-2 border rounded-lg ${selectedSortOrder === 'desc' ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'} hover:bg-blue-100`}
+          className={`px-4 py-2 border rounded-lg ${selectedSortOrder === 'desc' ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'} hover:bg-blue-100 focus:outline-none`}
         >
           Price: High to Low
         </button>
