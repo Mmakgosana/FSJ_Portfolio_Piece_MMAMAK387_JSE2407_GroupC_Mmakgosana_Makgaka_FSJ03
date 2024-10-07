@@ -9,8 +9,6 @@ import Header from "./components/Header";
 import CategoryFilter from "./components/CategoryFilter";
 import SortOptions from "./components/SortOptions";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { metadata } from "./metadata";
-
 
 // Fetch products with filters and pagination
 async function fetchProducts(params) {
@@ -34,20 +32,18 @@ async function fetchCategories() {
   return res.json();
 }
 
-
-
 export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // State initialization based on query parameters
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  // State initialization
+  const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
-  const [selectedSort, setSelectedSort] = useState(searchParams.get("sort") || "price");
-  const [selectedOrder, setSelectedOrder] = useState(searchParams.get("order") || "asc");
-  const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSort, setSelectedSort] = useState("price");
+  const [selectedOrder, setSelectedOrder] = useState("asc");
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,7 +61,6 @@ export default function ProductsPage() {
         limit: ITEMS_PER_PAGE
       };
       const data = await fetchProducts(params);
-      console.log("Fetched data:", data); // Log the fetched data
       setProducts(data.products || data);
       setTotalPages(Math.ceil((data.total || data.length) / ITEMS_PER_PAGE));
     } catch (error) {
@@ -86,7 +81,6 @@ export default function ProductsPage() {
         console.error("Failed to load categories:", error);
       }
     };
-
     loadCategories();
   }, []);
 
