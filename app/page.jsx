@@ -16,7 +16,7 @@ async function fetchProducts(params) {
     ...params,
     skip: ((params.page - 1) * params.limit).toString(),
   }).toString();
-  const res = await fetch(`https://next-ecommerce-api.vercel.app/products?${queryString}`);
+  const res = await fetch(`/api/products?${queryString}`);
   if (!res.ok) {
     throw new Error("Failed to fetch products");
   }
