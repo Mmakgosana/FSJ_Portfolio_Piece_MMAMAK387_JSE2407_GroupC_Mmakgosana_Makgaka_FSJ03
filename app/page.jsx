@@ -153,7 +153,7 @@ export default function ProductsPage() {
             <div className="mb-4 relative">
               <input
                 type="text"
-                placeholder="Search for products..."
+                aria-label="Search for products"
                 value={searchQuery}
                 onChange={handleSearch}
                 className="w-full p-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -182,7 +182,9 @@ export default function ProductsPage() {
 
             {/* Products Grid */}
             {isLoading ? (
-              <p>Loading products...</p>
+              <div className="flex justify-center items-center">
+                <div className="loader"></div>
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
                 {products.length > 0 ? (
