@@ -1,29 +1,23 @@
-// /pages/api/productsByCategory.js
-import { collection, query, where, getDocs } from "firebase/firestore";
+// app/api/categories/route.js
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebaseconfig";
+import { NextResponse } from "next/server";
 
-
-export default async function handler(req, res) {
-  const { category } = req.query;
-
-  if (!category) {
-    return res.status(400).json({ error: "Category parameter is required." });
-  }
-
+export async function GET(req) {
   try {
-    const productsCollection = collection(db, "categories", "allCategories");
-    const productsQuery = query(productsCollection, where("category", "==", category));
-    const productsSnapshot = await getDocs(productsQuery);
+    // Adjusted collection path to fetch the 'categories' collection directly
+    const categoriesCollection = collection(db, "categories");
+    const categoriesSnapshot = await getDocs(categoriesCollection);
 
-    // Map through the documents and format the response
-    const products = productsSnapshot.docs.map((doc) => ({
+    // Map through the documents to create a list of categories
+    const categories = categoriesSnapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
-    res.status(200).json({ products });
+    return NextResponse.json({ categories });
   } catch (error) {
-    console.error("Error fetching products by category:", error);
-    res.status(500).json({ error: "Failed to fetch products." });
+    console.error("Error fetching categories:", error);
+    return NextResponse.json({ error: "Failed to fetch categories." }, { status: 500 });
   }
 }

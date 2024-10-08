@@ -1,26 +1,22 @@
-// /pages/api/products/[id].js
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { db } from "@/app/firebaseconfig";
+// api/products/[id]/route.js
+import { NextResponse } from 'next/server';
+import { db } from '@/app/firebaseconfig';
+import { doc, getDoc } from 'firebase/firestore';
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-export default async function handler(req, res) {
-  const { id } = req.query;
+export async function GET(request, { params }) {
+  const { id } = params; // Get the product ID from the route parameters
 
   try {
-    const productDoc = doc(db, "products", id);
-    const productSnapshot = await getDoc(productDoc);
+    const docRef = doc(db, 'products', id);
+    const docSnap = await getDoc(docRef);
 
-    if (productSnapshot.exists()) {
-      res.status(200).json({ id: productSnapshot.id, ...productSnapshot.data() });
-    } else {
-      res.status(404).json({ error: "Product not found" });
+    if (!docSnap.exists()) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
+
+    return NextResponse.json({ id: docSnap.id, ...docSnap.data() });
   } catch (error) {
-    console.error("Error fetching product by ID:", error);
-    res.status(500).json({ error: "Failed to fetch product." });
+    console.error("Error fetching product:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

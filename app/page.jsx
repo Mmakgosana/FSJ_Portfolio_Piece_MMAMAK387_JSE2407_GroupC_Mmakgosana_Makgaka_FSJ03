@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useContext, createContext } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
@@ -14,7 +14,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 async function fetchProducts(params) {
   const queryString = new URLSearchParams({
     ...params,
-    skip: ((params.page - 1) * params.limit).toString(),
+    limit: params.limit, // Ensure to include the limit in the params
   }).toString();
   const res = await fetch(`/api/products?${queryString}`);
   if (!res.ok) {
@@ -24,13 +24,14 @@ async function fetchProducts(params) {
 }
 
 // Fetch categories
-async function fetchCategories() {
-  const res = await fetch('https://next-ecommerce-api.vercel.app/categories'); 
-  if (!res.ok) {
-    throw new Error("Failed to fetch categories");
+const fetchCategories = async () => {
+  const response = await fetch('/api/categories');
+  if (!response.ok) {
+    throw new Error('Failed to fetch categories');
   }
-  return res.json();
-}
+  const data = await response.json();
+  return data.categories || []; // Return the categories or an empty array if undefined
+};
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -39,13 +40,14 @@ export default function ProductsPage() {
   // State initialization
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]); // State for categories
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSort, setSelectedSort] = useState("price");
   const [selectedOrder, setSelectedOrder] = useState("asc");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const ITEMS_PER_PAGE = 20;
 
@@ -53,15 +55,15 @@ export default function ProductsPage() {
     setIsLoading(true);
     try {
       const params = {
-        search: searchQuery,
+        searchTerm: searchQuery,
         category: selectedCategory,
         sort: selectedSort,
         order: selectedOrder,
-        page: page,
-        limit: ITEMS_PER_PAGE
+        page: page - 1, // Adjust page to be 0-indexed
+        limit: ITEMS_PER_PAGE,
       };
       const data = await fetchProducts(params);
-      setProducts(data.products || data);
+      setProducts(data.products || []);
       setTotalPages(Math.ceil((data.total || data.length) / ITEMS_PER_PAGE));
     } catch (error) {
       console.error("Failed to fetch products:", error);
@@ -76,7 +78,7 @@ export default function ProductsPage() {
     const loadCategories = async () => {
       try {
         const fetchedCategories = await fetchCategories();
-        setCategories(fetchedCategories);
+        setCategories(fetchedCategories); // Set the categories in state
       } catch (error) {
         console.error("Failed to load categories:", error);
       }
@@ -104,10 +106,15 @@ export default function ProductsPage() {
   // Parse URL parameters on page load
   useEffect(() => {
     const newPage = parseInt(searchParams.get("page")) || 1;
-    setSearchQuery(searchParams.get("search") || "");
-    setSelectedCategory(searchParams.get("category") || "");
-    setSelectedSort(searchParams.get("sort") || "price");
-    setSelectedOrder(searchParams.get("order") || "asc");
+    const searchParam = searchParams.get("search") || "";
+    const categoryParam = searchParams.get("category") || "";
+    const sortParam = searchParams.get("sort") || "price";
+    const orderParam = searchParams.get("order") || "asc";
+
+    setSearchQuery(searchParam);
+    setSelectedCategory(categoryParam);
+    setSelectedSort(sortParam);
+    setSelectedOrder(orderParam);
     setPage(newPage);
   }, [searchParams]);
 
@@ -186,21 +193,18 @@ export default function ProductsPage() {
                 <div className="loader"></div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
-                {products.length > 0 ? (
-                  products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))
-                ) : (
-                  <p>No products found.</p>
-                )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+                {products.length === 0 && <p>No products found.</p>}
               </div>
             )}
 
-            {/* Pagination Component */}
-            <Pagination 
-              currentPage={page} 
-              totalPages={totalPages} 
+            {/* Pagination */}
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
               onPageChange={handlePageChange}
             />
           </div>

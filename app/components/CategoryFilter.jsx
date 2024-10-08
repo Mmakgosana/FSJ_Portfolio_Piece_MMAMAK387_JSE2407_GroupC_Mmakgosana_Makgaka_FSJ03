@@ -10,11 +10,17 @@ const CategoryFilter = ({ categories, selectedCategory, onSelectCategory }) => {
         className="px-4 py-2 border rounded-lg bg-white text-blue-500 hover:bg-blue-100"
       >
         <option value="">All Categories</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category}
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name} {/* Adjust according to your category structure */}
+            </option>
+          ))
+        ) : (
+          <option value="" disabled>
+            Loading categories...
           </option>
-        ))}
+        )}
       </select>
     </div>
   );
