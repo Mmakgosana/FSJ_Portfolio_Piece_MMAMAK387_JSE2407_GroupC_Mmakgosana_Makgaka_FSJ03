@@ -7,6 +7,11 @@ import ProductImageCarousel from './ProductImageCarousel';
 export default function ProductDetails({ product }) {
   // State to manage review sorting
   const [sortOrder, setSortOrder] = useState("newest"); // Default sort by newest
+  const [reviewForm, setReviewForm] = useState({
+    rating: 0,
+    comment: '',
+  });
+  const [editingReviewId, setEditingReviewId] = useState(null);
 
   // Function to handle review sorting
   const sortedReviews = [...product.reviews].sort((a, b) => {
@@ -21,6 +26,50 @@ export default function ProductDetails({ product }) {
     }
     return 0; // Default case
   });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setReviewForm({
+      ...reviewForm,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (editingReviewId) {
+      // Edit review
+      await updateReview(editingReviewId, reviewForm);
+      setEditingReviewId(null);
+    } else {
+      // Add new review
+      await addReview(reviewForm);
+    }
+    setReviewForm({ rating: 0, comment: '' }); // Reset form
+  };
+
+  const addReview = async (reviewData) => {
+    // Replace with your API call to add review
+    // e.g., await fetch('/api/reviews', { method: 'POST', body: JSON.stringify(reviewData) });
+    console.log("Adding review:", reviewData);
+  };
+
+  const updateReview = async (reviewId, reviewData) => {
+    // Replace with your API call to update review
+    // e.g., await fetch(`/api/reviews/${reviewId}`, { method: 'PATCH', body: JSON.stringify(reviewData) });
+    console.log("Updating review:", reviewId, reviewData);
+  };
+
+  const handleEditReview = (review) => {
+    setReviewForm({ rating: review.rating, comment: review.comment });
+    setEditingReviewId(review.id);
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    // Replace with your API call to delete review
+    // e.g., await fetch(`/api/reviews/${reviewId}`, { method: 'DELETE' });
+    console.log("Deleting review:", reviewId);
+  };
 
   return (
     <div>
@@ -98,11 +147,59 @@ export default function ProductDetails({ product }) {
                   </p>
                   <p className="text-sm text-gray-600">{review.comment}</p>
                   <p className="text-sm font-semibold">Rating: {review.rating}</p>
+                  <div className="flex space-x-2 mt-2">
+                    <button
+                      onClick={() => handleEditReview(review)}
+                      className="text-blue-500 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteReview(review.id)}
+                      className="text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
               <p className="text-sm text-gray-500">No reviews yet.</p>
             )}
+
+            {/* Review form */}
+            <form onSubmit={handleSubmit} className="mt-4">
+              <h4 className="text-lg font-semibold mb-2">
+                {editingReviewId ? 'Edit Review' : 'Add a Review'}
+              </h4>
+              <div className="flex flex-col space-y-2 mb-4">
+                <input
+                  type="number"
+                  name="rating"
+                  value={reviewForm.rating}
+                  onChange={handleInputChange}
+                  placeholder="Rating (1-5)"
+                  min="1"
+                  max="5"
+                  required
+                  className="p-2 border rounded-md"
+                />
+                <textarea
+                  name="comment"
+                  value={reviewForm.comment}
+                  onChange={handleInputChange}
+                  placeholder="Comment"
+                  required
+                  className="p-2 border rounded-md"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                {editingReviewId ? 'Update Review' : 'Submit Review'}
+              </button>
+            </form>
           </div>
         </div>
       </div>
