@@ -1,26 +1,25 @@
 import { NextResponse } from 'next/server';
 import { db } from "@/app/firebaseconfig";
-import { collection, query, getDocs, limit, where, startAfter,orderBy, } from 'firebase/firestore';
+import { collection, query, getDocs, limit, where, startAfter, orderBy } from 'firebase/firestore';
 import Fuse from 'fuse.js';
 
-
 export async function GET(request) {
-  const params = new URL(request.url).searchParams
-  const searchTerm = params.get("searchTerm")
-  const category = params.get("category")
-  const sort = params.get("sort")
-  const order = params.get("order")
+  const params = new URL(request.url).searchParams;
+  const searchTerm = params.get("searchTerm");
+  const category = params.get("category");
+  const sort = params.get("sort");
+  const order = params.get("order");
+  const page = parseInt(params.get("page"), 10) || 1; // Get the page number, default to 1
+  const limitCount = 20; // Limit products to 20 per page
+  const startIndex = (page - 1) * limitCount; // Calculate start index for pagination
   
-  console.log(category);
   try {
     // Initialize a query for products
     let productsQuery = query(collection(db, 'products'));
-    
 
     // Filter by category if provided
     if (category) {
       productsQuery = query(productsQuery, where("category", "==", category));
-      
     }
 
     // Execute the query to fetch all products at once
@@ -45,14 +44,18 @@ export async function GET(request) {
       });
     }
 
-    // Return a JSON response with all the products data
+    // Paginate products
+    const paginatedProducts = products.slice(startIndex, startIndex + limitCount);
+    
+    // Return a JSON response with paginated products data
     return NextResponse.json({
-      products: products,
+      products: paginatedProducts,
       total: products.length, // Total number of products after filtering/searching
+      page,
+      totalPages: Math.ceil(products.length / limitCount), // Calculate total pages
     });
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-export default function Pagination({ currentPage, searchQuery, selectedCategory, selectedSortOrder }) {
+export default function Pagination({ currentPage, totalPages, searchQuery, selectedCategory, selectedSortOrder }) {
   const pageNum = parseInt(currentPage, 10);
   const prevPage = pageNum > 1 ? pageNum - 1 : null;
-  const nextPage = pageNum + 1; // Increase for the next page
+  const nextPage = pageNum < totalPages ? pageNum + 1 : null; // Only allow next page if it exists
 
   // Helper function to construct URL with current filters
   const buildUrl = (page) => {
@@ -23,12 +23,14 @@ export default function Pagination({ currentPage, searchQuery, selectedCategory,
           </button>
         </Link>
       )}
-      <span className="text-lg font-bold text-gray-700">Page {pageNum}</span>
-      <Link href={buildUrl(nextPage)}>
-        <button className="px-4 py-2 bg-pink-400 text-white rounded-lg hover:bg-purple-500 transition-colors duration-300">
-          Next Page
-        </button>
-      </Link>
+      <span className="text-lg font-bold text-gray-700">Page {pageNum} of {totalPages}</span>
+      {nextPage && (
+        <Link href={buildUrl(nextPage)}>
+          <button className="px-4 py-2 bg-pink-400 text-white rounded-lg hover:bg-purple-500 transition-colors duration-300">
+            Next Page
+          </button>
+        </Link>
+      )}
     </div>
   );
 }
