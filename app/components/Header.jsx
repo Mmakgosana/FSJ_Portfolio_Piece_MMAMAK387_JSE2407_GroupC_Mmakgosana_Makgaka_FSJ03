@@ -46,9 +46,14 @@ export default function Header() {
             Home
           </Link>
           {user ? (
-            <button onClick={handleLogout} className="hover:underline">
-              Sign Out
-            </button>
+            <>
+              <p className="mr-4 px-2 py-1 bg-white text-pink-500 text-sm font-semibold rounded-md">
+                Welcome, {user.email}!
+              </p>
+              <button onClick={handleLogout} className="hover:underline">
+                Sign Out
+              </button>
+            </>
           ) : (
             <>
               <Link href="/signup" className="mr-4 hover:underline">

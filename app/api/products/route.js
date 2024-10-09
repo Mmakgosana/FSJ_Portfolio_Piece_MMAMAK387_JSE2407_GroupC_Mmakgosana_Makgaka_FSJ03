@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from "@/app/firebaseconfig";
+import { db } from '../../firebaseconfig';
 import { collection, query, getDocs, limit, where, startAfter, orderBy } from 'firebase/firestore';
 import Fuse from 'fuse.js';
 
