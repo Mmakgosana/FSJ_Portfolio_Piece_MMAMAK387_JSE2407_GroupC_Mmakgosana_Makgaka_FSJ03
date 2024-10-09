@@ -1,29 +1,64 @@
+"use client";
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image'; // Import Next.js Image component for optimization
+import Image from 'next/image';
+import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { logout } from '../authfunctions'; // Update the import
 
 export default function Header() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // Use the `logout` function from authFunctions.js
+      console.log("Successfully signed out!");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <header className="bg-pink-400 text-white py-4 shadow-md">
       <div className="max-w-5xl mx-auto flex justify-between items-center px-4">
         <Link href="/" className="flex items-center">
-          {/* Logo */}
           <Image 
-            src="/logo.png" // Adjust this to the correct path of your logo
-            alt=" Logo"
-            width={40} // Set the desired width
-            height={40} // Set the desired height
+            src="/logo.png"
+            alt="Logo"
+            width={40}
+            height={40}
             className="mr-2"
           />
-          {/* Title */}
           <h1 className="text-2xl font-bold">Bargain Bliss</h1>
         </Link>
-        <nav>
+        <nav className="flex items-center">
           <Link href="/products" className="mr-4 hover:underline">
             Products
           </Link>
-          <Link href="/" className="hover:underline">
+          <Link href="/" className="mr-4 hover:underline">
             Home
           </Link>
+          {user ? (
+            <button onClick={handleLogout} className="hover:underline">
+              Sign Out
+            </button>
+          ) : (
+            <>
+              <Link href="/signup" className="mr-4 hover:underline">
+                Sign Up
+              </Link>
+              <Link href="/signin" className="hover:underline">
+                Sign In
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
