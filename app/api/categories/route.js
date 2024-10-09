@@ -1,18 +1,22 @@
 // app/api/categories/route.js
-import { collection, getDocs } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/firebaseconfig";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
-    // Adjusted collection path to fetch the 'categories' collection directly
-    const categoriesCollection = collection(db, "categories");
-    const categoriesSnapshot = await getDocs(categoriesCollection);
+    // Fetch the document containing the categories array
+    const categoriesDoc = doc(db, "categories", "allCategories");
+    const categoriesSnapshot = await getDoc(categoriesDoc);
 
-    // Map through the documents to create a list of categories
-    const categories = categoriesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
+    if (!categoriesSnapshot.exists()) {
+      throw new Error("No categories found");
+    }
+
+    const categoriesData = categoriesSnapshot.data();
+    const categories = categoriesData.categories.map((category, index) => ({
+      id: index,      // Use the index as a unique id
+      name: category, // The category string itself
     }));
 
     return NextResponse.json({ categories });

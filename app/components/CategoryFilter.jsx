@@ -12,12 +12,12 @@ const CategoryFilter = ({ categories, selectedCategory, onSelectCategory }) => {
         <option value="">All Categories</option>
         {categories.length > 0 ? (
           categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name} {/* Adjust according to your category structure */}
+            <option key={category.id} value={category.name}>
+              {category.name}
             </option>
           ))
         ) : (
-          <option value="" disabled>
+          <option value="">
             Loading categories...
           </option>
         )}

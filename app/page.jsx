@@ -14,7 +14,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 async function fetchProducts(params) {
   const queryString = new URLSearchParams({
     ...params,
-    limit: params.limit, // Ensure to include the limit in the params
+    limit: params.limit,
   }).toString();
   const res = await fetch(`/api/products?${queryString}`);
   if (!res.ok) {
@@ -30,7 +30,7 @@ const fetchCategories = async () => {
     throw new Error('Failed to fetch categories');
   }
   const data = await response.json();
-  return data.categories || []; // Return the categories or an empty array if undefined
+  return data.categories || [];
 };
 
 export default function ProductsPage() {
@@ -40,14 +40,13 @@ export default function ProductsPage() {
   // State initialization
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]); // State for categories
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSort, setSelectedSort] = useState("price");
   const [selectedOrder, setSelectedOrder] = useState("asc");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const ITEMS_PER_PAGE = 20;
 
@@ -59,7 +58,7 @@ export default function ProductsPage() {
         category: selectedCategory,
         sort: selectedSort,
         order: selectedOrder,
-        page: page - 1, // Adjust page to be 0-indexed
+        page: page - 1,
         limit: ITEMS_PER_PAGE,
       };
       const data = await fetchProducts(params);
@@ -78,7 +77,7 @@ export default function ProductsPage() {
     const loadCategories = async () => {
       try {
         const fetchedCategories = await fetchCategories();
-        setCategories(fetchedCategories); // Set the categories in state
+        setCategories(fetchedCategories);
       } catch (error) {
         console.error("Failed to load categories:", error);
       }
