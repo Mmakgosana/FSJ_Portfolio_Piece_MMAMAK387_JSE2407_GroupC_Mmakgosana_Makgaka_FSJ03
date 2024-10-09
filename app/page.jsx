@@ -118,6 +118,7 @@ export default function ProductsPage() {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
+    setCurrentPage(1); // Reset to the first page on category change
   };
 
   const handleSortChange = (sortOption) => {
@@ -158,7 +159,7 @@ export default function ProductsPage() {
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
-          onCategorySelect={handleCategorySelect}
+          onSelectCategory={handleCategorySelect} // Updated function name here
         />
         <SortOptions
           selectedSort={selectedSort}
