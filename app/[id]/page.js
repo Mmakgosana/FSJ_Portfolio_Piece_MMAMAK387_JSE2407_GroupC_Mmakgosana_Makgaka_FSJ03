@@ -6,7 +6,7 @@ import Head from "next/head"; // Import Head component for meta tags
 
 async function fetchProduct(id) {
   const res = await fetch(
-    `https://next-ecommerce-api.vercel.app/products/${id}`
+    `http://localhost:3000/api/products/${id}`
   );
 
   if (!res.ok) {

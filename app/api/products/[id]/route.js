@@ -1,13 +1,14 @@
 // api/products/[id]/route.js
 import { NextResponse } from 'next/server';
-import { db } from '@/app/firebaseconfig';
+import { db } from '../../../firebaseconfig';
 import { doc, getDoc } from 'firebase/firestore';
 
 export async function GET(request, { params }) {
   const { id } = params; // Get the product ID from the route parameters
 
   try {
-    const docRef = doc(db, 'products', id);
+    const paddedId = id.toString().padStart(3, "0");
+    const docRef = doc(db, 'products', paddedId);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
