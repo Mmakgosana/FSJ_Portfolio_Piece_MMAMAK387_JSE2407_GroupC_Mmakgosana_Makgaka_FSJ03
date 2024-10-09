@@ -12,7 +12,8 @@ export async function GET(request, { params }) {
 
     if (!docSnap.exists()) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
+    
+}
 
     return NextResponse.json({ id: docSnap.id, ...docSnap.data() });
   } catch (error) {
