@@ -32,9 +32,9 @@ export default function Header() {
           <Image 
             src="/logo.png"
             alt="Logo"
-            width={40}
-            height={40}
-            className="mr-2"
+            width={60}
+            height={60}
+            className="mr-2 rounded-full"
           />
           <h1 className="text-2xl font-bold">Bargain Bliss</h1>
         </Link>
