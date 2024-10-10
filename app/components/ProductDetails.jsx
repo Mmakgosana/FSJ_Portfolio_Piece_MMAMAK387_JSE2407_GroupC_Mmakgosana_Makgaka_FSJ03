@@ -6,6 +6,7 @@ import { auth, db } from "../firebase"; // Update with your path to firebase.js
 import { doc, deleteDoc } from "firebase/firestore";
 import Head from "next/head";
 import ProductImageCarousel from "./ProductImageCarousel";
+import PopupMessage from "./PopupMessage"; // Import the PopupMessage component
 
 export default function ProductDetails({ product }) {
   const [sortOrder, setSortOrder] = useState("newest");
@@ -18,7 +19,8 @@ export default function ProductDetails({ product }) {
     rating: ''
   });
   const [user, setUser] = useState(null);
-  const [confirmationMessage, setConfirmationMessage] = useState(''); // State for confirmation message
+  const [confirmationMessage, setConfirmationMessage] = useState('');
+  const [isPopupVisible, setIsPopupVisible] = useState(false); // State for popup visibility
 
   // Monitor authentication state
   useEffect(() => {
@@ -48,7 +50,17 @@ export default function ProductDetails({ product }) {
           : review
       ));
     } else {
-      setReviews([...reviews, { ...currentReview, id: Date.now(), date: new Date() }]);
+      const newReview = { ...currentReview, id: Date.now(), date: new Date() };
+      setReviews([...reviews, newReview]);
+
+      // Show popup message after adding a review
+      setConfirmationMessage("Review has been successfully added!");
+      setIsPopupVisible(true); // Show the popup
+
+      // Clear the popup message after 3 seconds
+      setTimeout(() => {
+        setIsPopupVisible(false); // Hide the popup after timeout
+      }, 3000);
     }
     setIsEditing(false);
     setCurrentReview({ id: null, reviewerName: '', comment: '', rating: '' });
@@ -66,13 +78,14 @@ export default function ProductDetails({ product }) {
 
       // Update the local state to remove the deleted review
       setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
-      
-      // Set confirmation message
-      setConfirmationMessage("Review has been successfully deleted!");
 
-      // Clear the confirmation message after 3 seconds
+      // Show confirmation message for deletion
+      setConfirmationMessage("Review has been successfully deleted!");
+      setIsPopupVisible(true); // Show the popup for deletion
+
+      // Clear the popup message after 3 seconds
       setTimeout(() => {
-        setConfirmationMessage('');
+        setIsPopupVisible(false); // Hide the popup after timeout
       }, 3000);
     } catch (error) {
       console.error("Error deleting review: ", error);
@@ -119,13 +132,6 @@ export default function ProductDetails({ product }) {
           <p className={`text-sm font-medium mb-6 ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
             {product.stock > 0 ? 'In stock' : 'Out of stock'}
           </p>
-
-          {/* Confirmation Message */}
-          {confirmationMessage && (
-            <div className="mb-4 p-2 text-green-600 bg-green-200 rounded">
-              {confirmationMessage}
-            </div>
-          )}
 
           {/* Reviews Section */}
           <div className="bg-gray-100 p-4 rounded-lg shadow-md">
@@ -184,19 +190,23 @@ export default function ProductDetails({ product }) {
               <input
                 type="number"
                 placeholder="Rating (1-5)"
-                min="1"
-                max="5"
                 value={currentReview.rating}
-                onChange={(e) => setCurrentReview({ ...currentReview, rating: Number(e.target.value) })}
+                onChange={(e) => setCurrentReview({ ...currentReview, rating: e.target.value })}
                 className="w-full mb-2 p-2 border rounded-md"
               />
-              <button onClick={handleSaveReview} className="bg-blue-500 text-white px-4 py-2 rounded-md">
-                {isEditing ? "Save Changes" : "Add Review"}
+              <button onClick={handleSaveReview} className="bg-blue-500 text-white px-4 py-2 rounded">
+                {isEditing ? "Update Review" : "Submit Review"}
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Confirmation Popup Message */}
+      <PopupMessage 
+        message={isPopupVisible ? confirmationMessage : ''} 
+        onClose={() => setIsPopupVisible(false)} 
+      />
     </div>
   );
 }
