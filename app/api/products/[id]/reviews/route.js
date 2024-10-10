@@ -1,65 +1,100 @@
-// pages/api/reviews.js
-import { db } from '../../firebase'; // Adjust path as needed
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { NextResponse } from 'next/server';
+import { db } from '../../../../firebaseconfig'; // Adjust the path to your firebase config
+import { doc, deleteDoc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { verifyIdToken } from '../../../secureendpoint'; // Adjust if needed to your auth verification utility
 
-export default async function handler(req, res) {
-  const { method } = req;
-  const auth = getAuth();
-  const user = auth.currentUser;
+// Adding a Review
+export async function POST(request, { params }) {
+  const { id } = params;
+  const { rating, comment, reviewerName, reviewerEmail } = await request.json();
 
-  // Check for user authentication
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized: You must be logged in to perform this action.' });
+  // Verify the user authentication token
+  const token = request.headers.get('Authorization')?.split('Bearer ')[1];
+  const decodedToken = await verifyIdToken(token);
+
+  if (!decodedToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  switch (method) {
-    case 'POST':
-      // Adding a review
-      const { productId, review } = req.body;
+  try {
+    const reviewId = Date.now().toString(); // Unique review ID based on timestamp
+    const reviewData = {
+      rating,
+      comment,
+      date: new Date(),
+      reviewerName,
+      reviewerEmail,
+    };
 
-      try {
-        const reviewRef = doc(db, "products", productId, "reviews", review.id);
-        await setDoc(reviewRef, {
-          ...review,
-          date: new Date(),
-          reviewerEmail: user.email, // Save user email
-          reviewerName: user.displayName || user.email // Use displayName or email as reviewer name
-        });
-        return res.status(200).json({ message: 'Review added successfully', review });
-      } catch (error) {
-        console.error("Error adding review: ", error);
-        return res.status(500).json({ error: 'Failed to add review' });
-      }
+    await setDoc(doc(db, 'products', id, 'reviews', reviewId), reviewData);
 
-    case 'PUT':
-      // Editing a review
-      const { id, updatedReview } = req.body;
+    return NextResponse.json({ message: 'Review added successfully', reviewId });
+  } catch (error) {
+    console.error('Error adding review:', error);
+    return NextResponse.json({ error: 'Failed to add review' }, { status: 500 });
+  }
+}
 
-      try {
-        const reviewRef = doc(db, "products", updatedReview.productId, "reviews", id);
-        await setDoc(reviewRef, { ...updatedReview, date: new Date() }, { merge: true });
-        return res.status(200).json({ message: 'Review updated successfully', review: { ...updatedReview, date: new Date() } });
-      } catch (error) {
-        console.error("Error updating review: ", error);
-        return res.status(500).json({ error: 'Failed to update review' });
-      }
+// Editing a Review
+export async function PUT(request, { params }) {
+  const { id } = params;
+  const { reviewId, rating, comment } = await request.json();
 
-    case 'DELETE':
-      // Deleting a review
-      const { reviewId, productIdToDelete } = req.body;
+  // Verify the user authentication token
+  const token = request.headers.get('Authorization')?.split('Bearer ')[1];
+  const decodedToken = await verifyIdToken(token);
 
-      try {
-        const reviewRef = doc(db, "products", productIdToDelete, "reviews", reviewId);
-        await deleteDoc(reviewRef);
-        return res.status(200).json({ message: 'Review deleted successfully' });
-      } catch (error) {
-        console.error("Error deleting review: ", error);
-        return res.status(500).json({ error: 'Failed to delete review' });
-      }
+  if (!decodedToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-    default:
-      res.setHeader('Allow', ['POST', 'PUT', 'DELETE']);
-      return res.status(405).end(`Method ${method} Not Allowed`);
+  try {
+    const reviewRef = doc(db, 'products', id, 'reviews', reviewId);
+    const reviewSnapshot = await getDoc(reviewRef);
+
+    if (!reviewSnapshot.exists()) {
+      return NextResponse.json({ error: 'Review not found' }, { status: 404 });
+    }
+
+    await updateDoc(reviewRef, {
+      rating,
+      comment,
+      date: new Date(), // Update the date
+    });
+
+    return NextResponse.json({ message: 'Review updated successfully' });
+  } catch (error) {
+    console.error('Error updating review:', error);
+    return NextResponse.json({ error: 'Failed to update review' }, { status: 500 });
+  }
+}
+
+// Deleting a Review
+export async function DELETE(request, { params }) {
+  const { id } = params;
+  const { reviewId } = await request.json();
+
+  // Verify the user authentication token
+  const token = request.headers.get('Authorization')?.split('Bearer ')[1];
+  const decodedToken = await verifyIdToken(token);
+
+  if (!decodedToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const reviewRef = doc(db, 'products', id, 'reviews', reviewId);
+    const reviewSnapshot = await getDoc(reviewRef);
+
+    if (!reviewSnapshot.exists()) {
+      return NextResponse.json({ error: 'Review not found' }, { status: 404 });
+    }
+
+    await deleteDoc(reviewRef);
+
+    return NextResponse.json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    return NextResponse.json({ error: 'Failed to delete review' }, { status: 500 });
   }
 }
