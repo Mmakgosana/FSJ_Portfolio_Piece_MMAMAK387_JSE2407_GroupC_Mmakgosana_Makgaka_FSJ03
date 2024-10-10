@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase"; // Update with your path to firebase.js
+import { auth, db } from "../firebase"; // Update with your path to firebase.js
+import { doc, deleteDoc } from "firebase/firestore";
 import Head from "next/head";
 import ProductImageCarousel from "./ProductImageCarousel";
 
@@ -53,22 +54,21 @@ export default function ProductDetails({ product }) {
   };
 
   const handleDeleteReview = async (id) => {
-  if (!user) {
-    alert("You must be logged in to delete a review.");
-    return;
-  }
+    if (!user) {
+      alert("You must be logged in to delete a review.");
+      return;
+    }
 
-  try {
-    // Delete the review from Firestore
-    await deleteDoc(doc(db, "products", product.id, "reviews", id));
+    try {
+      // Delete the review from Firestore
+      await deleteDoc(doc(db, "products", product.id, "reviews", id.toString())); // Ensure id is a string
 
-    // Update the local state to remove the deleted review
-    setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
-  } catch (error) {
-    console.error("Error deleting review: ", error);
-  }
-};
-
+      // Update the local state to remove the deleted review
+      setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
+    } catch (error) {
+      console.error("Error deleting review: ", error);
+    }
+  };
 
   const handleEditReview = (review) => {
     if (!user) {
