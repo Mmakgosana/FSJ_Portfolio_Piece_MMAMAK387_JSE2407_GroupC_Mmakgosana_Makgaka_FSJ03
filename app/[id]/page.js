@@ -1,3 +1,4 @@
+"use client"
 import { notFound } from "next/navigation";
 import Header from "../components/Header";
 import ProductDetails from "../components/ProductDetails";
