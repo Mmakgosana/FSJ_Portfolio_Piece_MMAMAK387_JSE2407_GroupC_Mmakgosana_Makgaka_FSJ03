@@ -1,10 +1,12 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase"; // Update with your path to firebase.js
 import Head from "next/head";
 import ProductImageCarousel from "./ProductImageCarousel";
+import { doc, deleteDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase"; // Adjust the path to your firebase config
 
 export default function ProductDetails({ product }) {
   const [sortOrder, setSortOrder] = useState("newest");
@@ -34,41 +36,50 @@ export default function ProductDetails({ product }) {
     return 0;
   });
 
-  const handleSaveReview = () => {
+  const handleSaveReview = async () => {
     if (!user) {
       alert("You must be logged in to add a review.");
       return;
     }
-    if (isEditing) {
-      setReviews(reviews.map((review) =>
-        review.id === currentReview.id
-          ? { ...review, ...currentReview, date: new Date() }
-          : review
-      ));
-    } else {
-      setReviews([...reviews, { ...currentReview, id: Date.now(), date: new Date() }]);
+
+    const reviewData = {
+      ...currentReview,
+      productId: product.id, // Assuming product.id is available
+      date: new Date(),
+    };
+
+    try {
+      if (isEditing) {
+        // Editing a review
+        await setDoc(doc(db, "products", product.id, "reviews", currentReview.id), reviewData);
+        setReviews(reviews.map((review) => (review.id === currentReview.id ? { ...reviewData } : review)));
+      } else {
+        // Adding a review
+        await setDoc(doc(db, "products", product.id, "reviews", Date.now().toString()), reviewData);
+        setReviews([...reviews, { ...reviewData, id: Date.now().toString() }]);
+      }
+      setIsEditing(false);
+      setCurrentReview({ id: null, reviewerName: '', comment: '', rating: '' });
+    } catch (error) {
+      console.error("Error saving review: ", error);
     }
-    setIsEditing(false);
-    setCurrentReview({ id: null, reviewerName: '', comment: '', rating: '' });
   };
 
   const handleDeleteReview = async (id) => {
-  if (!user) {
-    alert("You must be logged in to delete a review.");
-    return;
-  }
+    if (!user) {
+      alert("You must be logged in to delete a review.");
+      return;
+    }
 
-  try {
-    // Delete the review from Firestore
-    await deleteDoc(doc(db, "products", product.id, "reviews", id));
-
-    // Update the local state to remove the deleted review
-    setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
-  } catch (error) {
-    console.error("Error deleting review: ", error);
-  }
-};
-
+    try {
+      // Delete the review from Firestore
+      await deleteDoc(doc(db, "products", product.id, "reviews", id));
+      // Update the local state to remove the deleted review
+      setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
+    } catch (error) {
+      console.error("Error deleting review: ", error);
+    }
+  };
 
   const handleEditReview = (review) => {
     if (!user) {
