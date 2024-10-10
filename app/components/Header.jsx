@@ -6,6 +6,7 @@ import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { logout } from '../authfunctions'; // Update the import
 
+
 export default function Header() {
   const [user, setUser] = useState(null);
 
