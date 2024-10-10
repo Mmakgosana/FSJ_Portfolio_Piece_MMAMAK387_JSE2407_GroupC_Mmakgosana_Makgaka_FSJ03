@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
 import Header from "./components/Header";
@@ -10,7 +10,6 @@ import SortOptions from "./components/SortOptions";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Pagination from "./components/Pagination"; // Ensure to import Pagination
 
-// Fetch products with filters (limit removed)
 async function fetchProducts(params) {
   const queryString = new URLSearchParams({
     ...params,
@@ -22,7 +21,6 @@ async function fetchProducts(params) {
   return res.json();
 }
 
-// Fetch categories
 const fetchCategories = async () => {
   const response = await fetch('/api/categories');
   if (!response.ok) {
@@ -34,17 +32,16 @@ const fetchCategories = async () => {
 
 export default function ProductsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSort, setSelectedSort] = useState("price"); // Default sort
-  const [selectedOrder, setSelectedOrder] = useState("asc"); // Default order
+  const [selectedSort, setSelectedSort] = useState("price");
+  const [selectedOrder, setSelectedOrder] = useState("asc");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
-  const [totalPages, setTotalPages] = useState(1); // Track total pages
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchProductsData = useCallback(async () => {
     setIsLoading(true);
@@ -54,11 +51,11 @@ export default function ProductsPage() {
         category: selectedCategory,
         sort: selectedSort,
         order: selectedOrder,
-        page: currentPage, // Include current page in params
+        page: currentPage,
       };
       const data = await fetchProducts(params);
       setProducts(data.products || []);
-      setTotalPages(data.totalPages || 1); // Set total pages
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error("Failed to fetch products:", error);
       setProducts([]);
@@ -66,7 +63,6 @@ export default function ProductsPage() {
     setIsLoading(false);
   }, [searchQuery, selectedCategory, selectedSort, selectedOrder, currentPage]);
 
-  // Fetch categories on initial load
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -79,12 +75,26 @@ export default function ProductsPage() {
     loadCategories();
   }, []);
 
-  // Fetch products when filters or current page change
   useEffect(() => {
     fetchProductsData();
   }, [fetchProductsData]);
 
-  // Update URL with current filters and current page
+  useEffect(() => {
+    const { searchParams } = new URL(window.location.href);
+    
+    const searchParam = searchParams.get("search") || "";
+    const categoryParam = searchParams.get("category") || "";
+    const sortParam = searchParams.get("sort") || "price";
+    const orderParam = searchParams.get("order") || "asc";
+    const pageParam = parseInt(searchParams.get("page"), 10) || 1;
+
+    setSearchQuery(searchParam);
+    setSelectedCategory(categoryParam);
+    setSelectedSort(sortParam);
+    setSelectedOrder(orderParam);
+    setCurrentPage(pageParam);
+  }, []);
+
   useEffect(() => {
     const query = new URLSearchParams({
       search: searchQuery,
@@ -96,39 +106,23 @@ export default function ProductsPage() {
     router.push(`?${query}`, { scroll: false });
   }, [searchQuery, selectedCategory, selectedSort, selectedOrder, currentPage, router]);
 
-  // Parse URL parameters on page load
-  useEffect(() => {
-    const searchParam = searchParams.get("search") || "";
-    const categoryParam = searchParams.get("category") || "";
-    const sortParam = searchParams.get("sort") || "price";
-    const orderParam = searchParams.get("order") || "asc";
-    const pageParam = parseInt(searchParams.get("page"), 10) || 1;
-
-    setSearchQuery(searchParam);
-    setSelectedCategory(categoryParam);
-    setSelectedSort(sortParam);
-    setSelectedOrder(orderParam);
-    setCurrentPage(pageParam); // Set current page from URL
-  }, [searchParams]);
-
-  // Handlers for user input
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setCurrentPage(1); // Reset to the first page on category change
+    setCurrentPage(1);
   };
 
   const handleSortChange = (sortOption) => {
     setSelectedSort(sortOption);
-    setCurrentPage(1); // Reset to first page on sort change
+    setCurrentPage(1);
   };
 
   const handleOrderChange = (orderOption) => {
     setSelectedOrder(orderOption);
-    setCurrentPage(1); // Reset to first page on order change
+    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
@@ -136,7 +130,7 @@ export default function ProductsPage() {
     setSelectedCategory("");
     setSelectedSort("price");
     setSelectedOrder("asc");
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
   return (
@@ -159,7 +153,7 @@ export default function ProductsPage() {
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
-          onSelectCategory={handleCategorySelect} // Updated function name here
+          onSelectCategory={handleCategorySelect}
         />
         <SortOptions
           selectedSort={selectedSort}

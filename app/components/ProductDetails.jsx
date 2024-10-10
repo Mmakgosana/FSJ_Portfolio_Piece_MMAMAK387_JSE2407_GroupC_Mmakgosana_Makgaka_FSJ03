@@ -18,6 +18,7 @@ export default function ProductDetails({ product }) {
     rating: ''
   });
   const [user, setUser] = useState(null);
+  const [confirmationMessage, setConfirmationMessage] = useState(''); // State for confirmation message
 
   // Monitor authentication state
   useEffect(() => {
@@ -65,6 +66,14 @@ export default function ProductDetails({ product }) {
 
       // Update the local state to remove the deleted review
       setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
+      
+      // Set confirmation message
+      setConfirmationMessage("Review has been successfully deleted!");
+
+      // Clear the confirmation message after 3 seconds
+      setTimeout(() => {
+        setConfirmationMessage('');
+      }, 3000);
     } catch (error) {
       console.error("Error deleting review: ", error);
     }
@@ -110,6 +119,13 @@ export default function ProductDetails({ product }) {
           <p className={`text-sm font-medium mb-6 ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
             {product.stock > 0 ? 'In stock' : 'Out of stock'}
           </p>
+
+          {/* Confirmation Message */}
+          {confirmationMessage && (
+            <div className="mb-4 p-2 text-green-600 bg-green-200 rounded">
+              {confirmationMessage}
+            </div>
+          )}
 
           {/* Reviews Section */}
           <div className="bg-gray-100 p-4 rounded-lg shadow-md">
