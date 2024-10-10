@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react';
 import { auth, signOut } from '../firebase'; // Ensure correct path
 
